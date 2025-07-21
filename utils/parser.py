@@ -1,23 +1,45 @@
 # utils/parser.py
-from PyPDF2 import PdfReader
+import fitz  # PyMuPDF
 import re
 
-def extract_clauses_from_pdf(pdf_path):
-    reader = PdfReader(pdf_path)
+def extract_clauses_from_pdf(file_path):
+    doc = fitz.open(file_path)
     full_text = ""
-    for page in reader.pages:
-        full_text += page.extract_text() + "\n"
+    
+    # 전체 텍스트 추출
+    for page in doc:
+        page_text = page.get_text()
+        full_text += page_text + "\n"
 
-    clause_pattern = re.compile(r"^\\d+(\\.\\d+)*\\s", re.MULTILINE)
-    raw_clauses = re.split(clause_pattern, full_text)
-    matches = clause_pattern.findall(full_text)
-
+    # 정규표현식: 조항 헤더 추출 (예: "1.", "1.1", "2.3.4" 등)
+    clause_pattern = re.compile(r"(?P<header>(\d+(\.\d+)*))\s+(?P<body>.+)")
+    
+    # 결과 리스트
     clauses = []
-    for i in range(len(matches)):
-        clause = {
-            "section": matches[i].strip(),
-            "text": raw_clauses[i+1].strip() if i+1 < len(raw_clauses) else ""
-        }
-        clauses.append(clause)
+
+    # 현재 조항 추적
+    current_clause = None
+
+    for line in full_text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+
+        match = clause_pattern.match(line)
+        if match:
+            # 새 조항 시작
+            if current_clause:
+                clauses.append(current_clause)
+            current_clause = {
+                "section": match.group("header"),
+                "text": match.group("body")
+            }
+        elif current_clause:
+            # 현재 조항에 이어붙이기
+            current_clause["text"] += " " + line
+
+    # 마지막 조항 추가
+    if current_clause:
+        clauses.append(current_clause)
 
     return clauses
