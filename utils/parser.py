@@ -1,27 +1,25 @@
 # utils/parser.py
-
 import fitz  # PyMuPDF
 import re
 
-def extract_clauses_from_pdf(pdf_path):
-    doc = fitz.open(pdf_path)
-    full_text = ""
-
+def extract_clauses_from_pdf(file_path):
+    doc = fitz.open(file_path)
+    text = ""
     for page in doc:
-        full_text += page.get_text()
+        text += page.get_text()
 
-    # 정규표현식으로 조항 번호와 텍스트 추출
-    raw_clauses = re.split(r"\n?\s*(\d{1,2}(?:\.\d{1,2})*)\s+", full_text)
-    
-    # 첫 항목은 문서 시작부분, 이후는 [조항번호, 텍스트, 조항번호, 텍스트, ...]
+    # 정규표현식으로 조항 파싱 (예: 1. ~ / 1.1 ~ / 2. ~)
+    pattern = re.compile(r"(?P<section>\d{1,2}(?:\.\d{1,2})?)\s+(?P<text>.+?)(?=\n\d{1,2}(?:\.\d{1,2})?\s+|$)", re.DOTALL)
+    matches = pattern.finditer(text)
+
     clauses = []
-    for i in range(1, len(raw_clauses) - 1, 2):
-        section = raw_clauses[i].strip()
-        text = raw_clauses[i + 1].strip()
-        if text:  # 빈 텍스트 제거
+    for match in matches:
+        section = match.group("section").strip()
+        clause_text = match.group("text").strip().replace("\n", " ")
+        if clause_text:  # 빈 문자열 거르기
             clauses.append({
                 "section": section,
-                "text": text
+                "text": clause_text
             })
 
     return clauses
