@@ -4,30 +4,28 @@ from langchain.vectorstores import FAISS
 from langchain.schema import Document
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
-from langchain.prompts import PromptTemplate
+import os
 
+# ✅ 벡터스토어 초기화 함수
 def initialize_vector_store(clauses):
-    # ✅ 조항 중 텍스트가 있는 것만 필터링
-    filtered_clauses = [
-        clause for clause in clauses
-        if clause.get("text") and clause["text"].strip()
-    ]
+    documents = []
+    for clause in clauses:
+        text = clause.get("text", "").strip()
+        section = clause.get("section", "Unlabeled")
+        if text:  # 빈 텍스트 제외
+            documents.append(Document(page_content=text, metadata={"section": section}))
 
-    if not filtered_clauses:
-        raise ValueError("❌ 유효한 조항이 없습니다. 계약서에서 텍스트가 추출되지 않았습니다.")
+    if not documents:
+        raise ValueError("❌ 벡터스토어를 생성할 문서가 없습니다. 조항이 비어있거나 파싱에 실패했을 수 있습니다.")
 
-    documents = [
-        Document(
-            page_content=clause["text"].strip(),
-            metadata={"section": clause["section"]}
-        )
-        for clause in filtered_clauses
-    ]
+    print(f"✅ 총 문서 수: {len(documents)}")
 
     embeddings = OpenAIEmbeddings()
     db = FAISS.from_documents(documents, embeddings)
-    return {"db": db, "source_clauses": filtered_clauses}
 
+    return {"db": db, "source_clauses": clauses}
+
+# ✅ 사용자 질문에 대한 계약서 기반 응답 생성
 def query_contract(question, role, index):
     db = index["db"]
     retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 4})
@@ -38,24 +36,14 @@ def query_contract(question, role, index):
 계약서 원문은 영어이고, 아래 내용을 기반으로 질문에 답변해줘.
 """
 
-    prompt = PromptTemplate(
-        input_variables=["context", "question"],
-        template=f"""{system_prompt}
-
-문서 내용:
-{{context}}
-
-질문:
-{{question}}
-
-답변:"""
-    )
-
     qa_chain = RetrievalQA.from_chain_type(
         llm=ChatOpenAI(temperature=0.1),
         retriever=retriever,
         return_source_documents=False,
-        chain_type_kwargs={"prompt": prompt}
+        chain_type_kwargs={"prompt": {
+            "input_variables": ["context", "question"],
+            "template": f"{system_prompt}\n\n문서 내용:\n{{context}}\n\n질문:\n{{question}}\n\n답변:"
+        }}
     )
 
     return qa_chain.run(question)
