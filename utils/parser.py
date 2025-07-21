@@ -1,45 +1,27 @@
 # utils/parser.py
+
 import fitz  # PyMuPDF
 import re
 
-def extract_clauses_from_pdf(file_path):
-    doc = fitz.open(file_path)
+def extract_clauses_from_pdf(pdf_path):
+    doc = fitz.open(pdf_path)
     full_text = ""
-    
-    # 전체 텍스트 추출
+
     for page in doc:
-        page_text = page.get_text()
-        full_text += page_text + "\n"
+        full_text += page.get_text()
 
-    # 정규표현식: 조항 헤더 추출 (예: "1.", "1.1", "2.3.4" 등)
-    clause_pattern = re.compile(r"(?P<header>(\d+(\.\d+)*))\s+(?P<body>.+)")
+    # 정규표현식으로 조항 번호와 텍스트 추출
+    raw_clauses = re.split(r"\n?\s*(\d{1,2}(?:\.\d{1,2})*)\s+", full_text)
     
-    # 결과 리스트
+    # 첫 항목은 문서 시작부분, 이후는 [조항번호, 텍스트, 조항번호, 텍스트, ...]
     clauses = []
-
-    # 현재 조항 추적
-    current_clause = None
-
-    for line in full_text.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-
-        match = clause_pattern.match(line)
-        if match:
-            # 새 조항 시작
-            if current_clause:
-                clauses.append(current_clause)
-            current_clause = {
-                "section": match.group("header"),
-                "text": match.group("body")
-            }
-        elif current_clause:
-            # 현재 조항에 이어붙이기
-            current_clause["text"] += " " + line
-
-    # 마지막 조항 추가
-    if current_clause:
-        clauses.append(current_clause)
+    for i in range(1, len(raw_clauses) - 1, 2):
+        section = raw_clauses[i].strip()
+        text = raw_clauses[i + 1].strip()
+        if text:  # 빈 텍스트 제거
+            clauses.append({
+                "section": section,
+                "text": text
+            })
 
     return clauses
