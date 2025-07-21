@@ -5,24 +5,28 @@ from langchain.schema import Document
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
-import os
 
 def initialize_vector_store(clauses):
-    # 조항 필터링
+    # ✅ 조항 중 텍스트가 있는 것만 필터링
+    filtered_clauses = [
+        clause for clause in clauses
+        if clause.get("text") and clause["text"].strip()
+    ]
+
+    if not filtered_clauses:
+        raise ValueError("❌ 유효한 조항이 없습니다. 계약서에서 텍스트가 추출되지 않았습니다.")
+
     documents = [
         Document(
             page_content=clause["text"].strip(),
             metadata={"section": clause["section"]}
         )
-        for clause in clauses if clause["text"].strip()
+        for clause in filtered_clauses
     ]
-
-    if not documents:
-        raise ValueError("❌ 계약서에서 유효한 조항이 없습니다. PDF를 다시 확인해주세요.")
 
     embeddings = OpenAIEmbeddings()
     db = FAISS.from_documents(documents, embeddings)
-    return {"db": db, "source_clauses": clauses}
+    return {"db": db, "source_clauses": filtered_clauses}
 
 def query_contract(question, role, index):
     db = index["db"]
