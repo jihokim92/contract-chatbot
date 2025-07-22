@@ -14,242 +14,280 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS for beautiful UI
+# Clean, minimal CSS
 st.markdown("""
 <style>
-    /* Main container */
-    .main-container {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* Reset and base styles */
+    .main {
         padding: 2rem;
-        border-radius: 20px;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        background: #fafafa;
     }
     
     /* Header */
-    .main-header {
+    .header {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
         text-align: center;
-        color: white;
-        margin-bottom: 1rem;
+        border-left: 4px solid #2563eb;
     }
     
-    .main-header h1 {
+    .header h1 {
+        color: #1f2937;
         font-size: 2.5rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
     
-    .main-header p {
+    .header p {
+        color: #6b7280;
         font-size: 1.1rem;
-        opacity: 0.9;
+        margin: 0;
     }
     
-    /* Mode cards */
-    .mode-container {
-        display: flex;
-        gap: 1rem;
-        margin: 2rem 0;
-    }
-    
-    .mode-card {
-        flex: 1;
+    /* Mode selector */
+    .mode-selector {
         background: white;
         padding: 1.5rem;
-        border-radius: 15px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: 3px solid transparent;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
     }
     
-    .mode-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-    
-    .mode-card.active {
-        border-color: #667eea;
-        background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
-    }
-    
-    .mode-card h3 {
-        color: #333;
-        margin-bottom: 0.5rem;
+    .mode-title {
+        color: #1f2937;
         font-size: 1.3rem;
-    }
-    
-    .mode-card p {
-        color: #666;
-        font-size: 0.9rem;
-    }
-    
-    /* Upload area */
-    .upload-container {
-        background: white;
-        padding: 2rem;
-        border-radius: 15px;
-        margin: 2rem 0;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    
-    .upload-title {
-        color: #333;
-        font-size: 1.5rem;
+        font-weight: 600;
         margin-bottom: 1rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
     
-    /* Progress indicators */
-    .progress-container {
-        background: #f8f9fa;
+    .mode-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .mode-btn {
+        flex: 1;
         padding: 1rem;
-        border-radius: 10px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        background: white;
+        color: #6b7280;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+    
+    .mode-btn:hover {
+        border-color: #2563eb;
+        color: #2563eb;
+    }
+    
+    .mode-btn.active {
+        border-color: #2563eb;
+        background: #eff6ff;
+        color: #2563eb;
+    }
+    
+    .current-mode {
+        background: #f0f9ff;
+        border: 1px solid #0ea5e9;
+        color: #0369a1;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
         margin: 1rem 0;
-        border-left: 4px solid #667eea;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    /* Content containers */
+    .content-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .content-title {
+        color: #1f2937;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 2px solid #f3f4f6;
+        padding-bottom: 0.5rem;
+    }
+    
+    /* Status indicators */
+    .status-success {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .status-info {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1e40af;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .status-warning {
+        background: #fffbeb;
+        border: 1px solid #fed7aa;
+        color: #92400e;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    /* Progress steps */
+    .progress-container {
+        background: #f9fafb;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1rem 0;
     }
     
     .progress-step {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
+        padding: 0.8rem;
         margin: 0.5rem 0;
-        padding: 0.5rem;
-        border-radius: 8px;
+        border-radius: 6px;
         background: white;
+        border-left: 3px solid #d1d5db;
     }
     
     .progress-step.completed {
-        background: #e8f5e8;
-        border-left: 3px solid #4CAF50;
+        border-left-color: #10b981;
+        background: #f0fdf4;
     }
     
     .progress-step.pending {
-        background: #fff3cd;
-        border-left: 3px solid #ffc107;
+        border-left-color: #f59e0b;
+        background: #fffbeb;
     }
     
-    /* Category cards */
-    .category-container {
-        background: white;
+    /* Category display */
+    .category-section {
+        background: #f8fafc;
         padding: 1.5rem;
-        border-radius: 15px;
+        border-radius: 8px;
         margin: 1rem 0;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-left: 4px solid #10b981;
     }
     
-    .category-header {
-        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-        color: white;
-        padding: 1rem;
-        border-radius: 10px;
+    .category-title {
+        color: #065f46;
+        font-size: 1.2rem;
+        font-weight: 600;
         margin-bottom: 1rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
     
-    .clause-item {
-        background: #f8f9fa;
+    .clause-card {
+        background: white;
         padding: 1rem;
-        border-radius: 10px;
-        margin: 0.5rem 0;
-        border-left: 4px solid #667eea;
+        border-radius: 8px;
+        margin: 0.8rem 0;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
     .clause-number {
-        font-weight: bold;
-        color: #667eea;
-        margin-bottom: 0.5rem;
+        color: #2563eb;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #f3f4f6;
     }
     
-    .text-section {
-        margin: 0.5rem 0;
+    .text-block {
+        margin: 0.8rem 0;
         padding: 0.8rem;
-        border-radius: 8px;
+        border-radius: 6px;
+        border-left: 3px solid #d1d5db;
     }
     
-    .original-text {
-        background: #f5f5f5;
-        border-left: 3px solid #666;
+    .text-original {
+        background: #f9fafb;
+        border-left-color: #6b7280;
     }
     
-    .translated-text {
-        background: #e8f5e8;
-        border-left: 3px solid #4CAF50;
+    .text-translated {
+        background: #f0fdf4;
+        border-left-color: #10b981;
     }
     
     .text-label {
-        font-weight: bold;
-        margin-bottom: 0.3rem;
+        font-weight: 600;
         font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        color: #374151;
     }
     
-    /* Action buttons */
-    .action-button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* Buttons */
+    .primary-btn {
+        background: #2563eb;
         color: white;
         border: none;
         padding: 1rem 2rem;
-        border-radius: 10px;
-        font-size: 1.1rem;
-        font-weight: bold;
+        border-radius: 8px;
+        font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         width: 100%;
         margin: 1rem 0;
     }
     
-    .action-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    .primary-btn:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
     }
     
-    .action-button:disabled {
-        background: #ccc;
+    .primary-btn:disabled {
+        background: #9ca3af;
         cursor: not-allowed;
         transform: none;
     }
     
     /* Analysis result */
-    .analysis-container {
-        background: white;
-        padding: 2rem;
-        border-radius: 15px;
-        margin: 2rem 0;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        border-left: 4px solid #2196f3;
-    }
-    
-    .analysis-header {
-        color: #2196f3;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    /* Status indicators */
-    .status-success {
-        background: #e8f5e8;
-        color: #2e7d32;
-        padding: 0.8rem;
+    .analysis-result {
+        background: #f8fafc;
+        padding: 1.5rem;
         border-radius: 8px;
-        border-left: 4px solid #4CAF50;
-        margin: 0.5rem 0;
-    }
-    
-    .status-info {
-        background: #e3f2fd;
-        color: #1565c0;
-        padding: 0.8rem;
-        border-radius: 8px;
-        border-left: 4px solid #2196f3;
-        margin: 0.5rem 0;
+        margin: 1rem 0;
+        border-left: 4px solid #2563eb;
     }
     
     /* Hide Streamlit elements */
@@ -259,6 +297,18 @@ st.markdown("""
     
     .stDownloadButton > button {
         width: 100%;
+    }
+    
+    /* Debug info */
+    .debug-info {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        color: #92400e;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        font-family: monospace;
+        font-size: 0.9rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -274,14 +324,14 @@ if 'processing_complete' not in st.session_state:
     st.session_state.processing_complete = False
 if 'analysis_result' not in st.session_state:
     st.session_state.analysis_result = None
+if 'debug_info' not in st.session_state:
+    st.session_state.debug_info = []
 
 # Main header
 st.markdown("""
-<div class="main-container">
-    <div class="main-header">
-        <h1>📋 계약서 검토 시스템</h1>
-        <p>🔒 세션 기반 보안 | 🌍 다국어 지원 | 🤖 AI 분석</p>
-    </div>
+<div class="header">
+    <h1>📋 계약서 검토 시스템</h1>
+    <p>🔒 세션 기반 보안 | 🌍 다국어 지원 | 🤖 AI 분석</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -295,16 +345,17 @@ with st.sidebar:
         st.error("❌ OpenAI API 키 필요")
         st.info("Streamlit Secrets에서 OPENAI_API_KEY 설정")
 
-# Mode selection with beautiful cards
+# Mode selection
 st.markdown("""
-<div class="mode-container">
-    <div class="mode-card" onclick="document.querySelector('#mode1').click()">
-        <h3>🔍 단독 검토</h3>
-        <p>계약서 하나만 업로드하여<br>원론적 분석 진행</p>
-    </div>
-    <div class="mode-card" onclick="document.querySelector('#mode2').click()">
-        <h3>📚 비교 검토</h3>
-        <p>두 계약서를 비교하여<br>차이점 분석</p>
+<div class="mode-selector">
+    <div class="mode-title">🎯 검토 모드 선택</div>
+    <div class="mode-buttons">
+        <div class="mode-btn" onclick="document.querySelector('#mode1').click()">
+            🔍 단독 검토<br><small>계약서 하나만 분석</small>
+        </div>
+        <div class="mode-btn" onclick="document.querySelector('#mode2').click()">
+            📚 비교 검토<br><small>두 계약서 비교 분석</small>
+        </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -316,6 +367,7 @@ with col1:
         st.session_state.review_mode = "standalone"
         st.session_state.processing_complete = False
         st.session_state.analysis_result = None
+        st.session_state.debug_info = []
         st.rerun()
 
 with col2:
@@ -323,22 +375,21 @@ with col2:
         st.session_state.review_mode = "comparison"
         st.session_state.processing_complete = False
         st.session_state.analysis_result = None
+        st.session_state.debug_info = []
         st.rerun()
 
 # Display current mode
 current_mode = "단독 검토" if st.session_state.review_mode == "standalone" else "비교 검토"
 st.markdown(f"""
-<div class="status-info">
-    <strong>현재 모드:</strong> {current_mode}
+<div class="current-mode">
+    🎯 현재 모드: {current_mode}
 </div>
 """, unsafe_allow_html=True)
 
 # File upload section
 st.markdown("""
-<div class="upload-container">
-    <div class="upload-title">
-        📄 계약서 업로드
-    </div>
+<div class="content-box">
+    <div class="content-title">📄 계약서 업로드</div>
 """, unsafe_allow_html=True)
 
 def extract_text_from_pdf(pdf_file):
@@ -404,7 +455,7 @@ def categorize_clauses(clauses, client):
     """조항들을 카테고리별로 분류"""
     try:
         # 모든 조항 텍스트를 하나로 합치기
-        all_clauses_text = "\n\n".join([f"{clause['number']}: {clause['text'][:300]}" for clause in clauses[:15]])
+        all_clauses_text = "\n\n".join([f"{clause['number']}: {clause['text'][:200]}" for clause in clauses[:10]])
         
         prompt = f"""
 다음 계약서 조항들을 카테고리별로 분류해주세요:
@@ -449,6 +500,7 @@ JSON 형태로 응답해주세요:
         )
         
         result = response.choices[0].message.content
+        st.session_state.debug_info.append(f"GPT 응답: {result[:200]}...")
         
         # JSON 파싱 시도
         try:
@@ -457,12 +509,13 @@ JSON 형태로 응답해주세요:
             if json_start != -1 and json_end != -1:
                 json_str = result[json_start:json_end]
                 categorized = json.loads(json_str)
+                st.session_state.debug_info.append(f"JSON 파싱 성공: {len(categorized.get('categories', {}))}개 카테고리")
                 return categorized
-        except:
-            pass
+        except Exception as e:
+            st.session_state.debug_info.append(f"JSON 파싱 실패: {str(e)}")
         
         # 기본 분류
-        return {
+        default_categories = {
             "categories": {
                 "계약 목적 및 범위": [],
                 "당사자 권리와 의무": [],
@@ -476,8 +529,15 @@ JSON 형태로 응답해주세요:
             }
         }
         
+        # 기본 분류 로직: 첫 번째 조항을 "계약 목적 및 범위"에 넣기
+        if clauses:
+            default_categories["categories"]["계약 목적 및 범위"].append(clauses[0]["number"])
+            st.session_state.debug_info.append(f"기본 분류: {clauses[0]['number']}을 계약 목적에 추가")
+        
+        return default_categories
+        
     except Exception as e:
-        st.error(f"카테고리 분류 오류: {str(e)}")
+        st.session_state.debug_info.append(f"카테고리 분류 오류: {str(e)}")
         return None
 
 # Target contract upload
@@ -541,10 +601,8 @@ st.markdown("</div>", unsafe_allow_html=True)
 # Processing section
 if st.session_state.target_contract and st.session_state.target_contract["text"]:
     st.markdown("""
-    <div class="upload-container">
-        <div class="upload-title">
-            🚀 처리 및 분석
-        </div>
+    <div class="content-box">
+        <div class="content-title">🚀 처리 및 분석</div>
     """, unsafe_allow_html=True)
     
     # Check if ready for processing
@@ -552,7 +610,11 @@ if st.session_state.target_contract and st.session_state.target_contract["text"]
     if st.session_state.review_mode == "comparison":
         if not st.session_state.reference_contract or not st.session_state.reference_contract["text"]:
             ready_for_processing = False
-            st.warning("⚠️ 비교 검토를 위해서는 레퍼런스 계약서도 업로드해주세요.")
+            st.markdown("""
+            <div class="status-warning">
+                ⚠️ 비교 검토를 위해서는 레퍼런스 계약서도 업로드해주세요.
+            </div>
+            """, unsafe_allow_html=True)
     
     if ready_for_processing:
         if st.button("🌍 번역 및 분류 시작", type="primary", use_container_width=True, disabled=st.session_state.processing_complete):
@@ -564,15 +626,20 @@ if st.session_state.target_contract and st.session_state.target_contract["text"]
                     clauses = st.session_state.target_contract["clauses"]
                     
                     # 각 조항 번역
-                    for clause in clauses[:10]:  # 최대 10개 조항만 번역
+                    for i, clause in enumerate(clauses[:5]):  # 최대 5개 조항만 번역
                         clause["translated_text"] = translate_clause_to_korean(clause["text"], client)
+                        st.session_state.debug_info.append(f"조항 {clause['number']} 번역 완료")
                     
                     # 카테고리 분류
                     categorized = categorize_clauses(clauses, client)
                     st.session_state.target_contract["categorized_clauses"] = categorized
                     st.session_state.processing_complete = True
                     
-                    st.success("✅ 번역 및 분류 완료!")
+                    st.markdown("""
+                    <div class="status-success">
+                        ✅ 번역 및 분류 완료!
+                    </div>
+                    """, unsafe_allow_html=True)
                     
                 except Exception as e:
                     st.error(f"❌ 처리 중 오류가 발생했습니다: {str(e)}")
@@ -604,58 +671,72 @@ if st.session_state.target_contract and st.session_state.target_contract["text"]
     
     st.markdown("</div>", unsafe_allow_html=True)
 
+# Debug information
+if st.session_state.debug_info:
+    with st.expander("🔍 디버그 정보", expanded=False):
+        st.markdown("""
+        <div class="debug-info">
+        """, unsafe_allow_html=True)
+        for info in st.session_state.debug_info:
+            st.write(info)
+        st.markdown("</div>", unsafe_allow_html=True)
+
 # Display categorized clauses
 if st.session_state.processing_complete and st.session_state.target_contract.get("categorized_clauses"):
     st.markdown("""
-    <div class="category-container">
-        <div class="category-header">
-            📂 카테고리별 조항 분류
-        </div>
+    <div class="content-box">
+        <div class="content-title">📂 카테고리별 조항 분류</div>
     """, unsafe_allow_html=True)
     
     categorized = st.session_state.target_contract["categorized_clauses"]
     clauses_dict = {clause["number"]: clause for clause in st.session_state.target_contract["clauses"]}
     
+    total_clauses = 0
     for category, clause_numbers in categorized["categories"].items():
-        if clause_numbers:  # 해당 카테고리에 조항이 있는 경우만 표시
+        if clause_numbers:
+            total_clauses += len(clause_numbers)
             st.markdown(f"""
-            <div class="category-header">
-                📂 {category} ({len(clause_numbers)}개 조항)
-            </div>
+            <div class="category-section">
+                <div class="category-title">
+                    📂 {category} ({len(clause_numbers)}개 조항)
+                </div>
             """, unsafe_allow_html=True)
             
             for clause_num in clause_numbers:
                 if clause_num in clauses_dict:
                     clause = clauses_dict[clause_num]
                     st.markdown(f"""
-                    <div class="clause-item">
+                    <div class="clause-card">
                         <div class="clause-number">{clause['number']}</div>
                         
-                        <div class="text-section original-text">
+                        <div class="text-block text-original">
                             <div class="text-label">🌍 원문:</div>
-                            {clause['text'][:200]}{'...' if len(clause['text']) > 200 else ''}
+                            {clause['text'][:150]}{'...' if len(clause['text']) > 150 else ''}
                         </div>
                         
                         {f'''
-                        <div class="text-section translated-text">
+                        <div class="text-block text-translated">
                             <div class="text-label">🇰🇷 한국어:</div>
-                            {clause['translated_text'][:200]}{'...' if len(clause['translated_text']) > 200 else ''}
+                            {clause['translated_text'][:150]}{'...' if len(clause['translated_text']) > 150 else ''}
                         </div>
                         ''' if clause.get('translated_text') else ''}
                     </div>
                     """, unsafe_allow_html=True)
-            
-            st.divider()
+    
+    if total_clauses == 0:
+        st.markdown("""
+        <div class="status-warning">
+            ⚠️ 분류된 조항이 없습니다. 디버그 정보를 확인해주세요.
+        </div>
+        """, unsafe_allow_html=True)
     
     st.markdown("</div>", unsafe_allow_html=True)
 
 # Analysis section
 if st.session_state.target_contract and st.session_state.target_contract["text"]:
     st.markdown("""
-    <div class="analysis-container">
-        <div class="analysis-header">
-            🤖 AI 분석
-        </div>
+    <div class="content-box">
+        <div class="content-title">🤖 AI 분석</div>
     """, unsafe_allow_html=True)
     
     # Check if ready for analysis
@@ -663,7 +744,11 @@ if st.session_state.target_contract and st.session_state.target_contract["text"]
     if st.session_state.review_mode == "comparison":
         if not st.session_state.reference_contract or not st.session_state.reference_contract["text"]:
             ready_for_analysis = False
-            st.warning("⚠️ 비교 검토를 위해서는 레퍼런스 계약서도 업로드해주세요.")
+            st.markdown("""
+            <div class="status-warning">
+                ⚠️ 비교 검토를 위해서는 레퍼런스 계약서도 업로드해주세요.
+            </div>
+            """, unsafe_allow_html=True)
     
     if ready_for_analysis:
         if st.button("🚀 AI 분석 시작", type="primary", use_container_width=True):
@@ -728,9 +813,8 @@ if st.session_state.target_contract and st.session_state.target_contract["text"]
         # Display analysis result
         if st.session_state.analysis_result:
             st.markdown("""
-            <div class="analysis-header">
-                📊 AI 분석 결과
-            </div>
+            <div class="analysis-result">
+                <h4>📊 AI 분석 결과</h4>
             """, unsafe_allow_html=True)
             
             st.markdown(st.session_state.analysis_result)
@@ -746,15 +830,15 @@ if st.session_state.target_contract and st.session_state.target_contract["text"]
                 mime="text/plain",
                 use_container_width=True
             )
+            
+            st.markdown("</div>", unsafe_allow_html=True)
     
     st.markdown("</div>", unsafe_allow_html=True)
 
 # Security notice
 st.markdown("""
-<div class="upload-container">
-    <div class="upload-title">
-        🔒 보안 안내
-    </div>
+<div class="content-box">
+    <div class="content-title">🔒 보안 안내</div>
     <ul>
         <li>업로드된 모든 파일은 세션 종료 시 자동으로 삭제됩니다</li>
         <li>외부 저장소나 데이터베이스에 저장되지 않습니다</li>
