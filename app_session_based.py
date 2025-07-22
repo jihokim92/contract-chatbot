@@ -332,13 +332,9 @@ if 'analysis_result' not in st.session_state:
 if 'processing_step' not in st.session_state:
     st.session_state.processing_step = 0
 
-# Top banner
-st.markdown("""
-<div class="top-banner">
-    <div class="banner-text">이제 사이트에 채팅 버튼만 설치하면 14일 프로 플랜 무료 체험이 시작됩니다!</div>
-    <button class="banner-btn">계약서 분석 시작하기</button>
-</div>
-""", unsafe_allow_html=True)
+# Main title
+st.markdown("## 📋 계약서 검토 시스템")
+st.markdown("---")
 
 # Main app container
 st.markdown('<div class="app-container">', unsafe_allow_html=True)
@@ -351,32 +347,25 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Mode selection
-st.markdown("""
-<div class="mode-option" onclick="document.querySelector('#single_mode').click()">
-    <div class="mode-title">🔍 단독 검토</div>
-    <div class="mode-desc">계약서 하나만 업로드하여 AI 분석</div>
-</div>
-<div class="mode-option" onclick="document.querySelector('#compare_mode').click()">
-    <div class="mode-title">📚 비교 검토</div>
-    <div class="mode-desc">두 계약서를 비교하여 차이점 분석</div>
-</div>
-""", unsafe_allow_html=True)
+# Mode selection with radio buttons
+mode = st.radio(
+    "검토 모드 선택",
+    ["🔍 단독 검토", "📚 비교 검토"],
+    label_visibility="collapsed",
+    horizontal=True
+)
 
-# Hidden mode buttons (simplified)
-if st.button("", key="single_mode", help="단독 검토", label_visibility="collapsed"):
+# Update session state based on selection
+if "단독 검토" in mode:
     st.session_state.mode = "single"
-    st.session_state.processing_step = 0
-    st.session_state.categorized_clauses = None
-    st.session_state.analysis_result = None
-    st.rerun()
-
-if st.button("", key="compare_mode", help="비교 검토", label_visibility="collapsed"):
+else:
     st.session_state.mode = "compare"
+
+# Reset when mode changes
+if st.session_state.processing_step > 0:
     st.session_state.processing_step = 0
     st.session_state.categorized_clauses = None
     st.session_state.analysis_result = None
-    st.rerun()
 
 # File upload section
 st.markdown("""
@@ -547,7 +536,7 @@ if st.session_state.target_text and st.session_state.processing_step >= 1:
         """, unsafe_allow_html=True)
     
     if ready:
-        if st.button("🌍 분석 시작", type="primary", use_container_width=True):
+        if st.button("🚀 분석 시작", type="primary", use_container_width=True):
             with st.spinner("계약서를 분석하고 있습니다..."):
                 try:
                     client = openai.OpenAI()
@@ -559,6 +548,62 @@ if st.session_state.target_text and st.session_state.processing_step >= 1:
                     # 조항 분류
                     st.session_state.categorized_clauses = categorize_clauses_simple(st.session_state.clauses)
                     st.session_state.processing_step = 3
+                    
+                    # AI 분석도 함께 실행
+                    try:
+                        # 분석 프롬프트 준비
+                        if st.session_state.mode == "single":
+                            prompt = f"""
+다음 계약서를 전문적으로 분석해주세요:
+
+계약서 내용:
+{st.session_state.target_text[:4000]}
+
+다음 항목들을 중심으로 분석해주세요:
+1. 계약의 주요 목적과 범위
+2. 당사자의 권리와 의무
+3. 책임과 보상 조항
+4. 위험 요소와 주의사항
+5. 개선이 필요한 조항들
+6. 전반적인 평가 및 권고사항
+
+한국어로 상세히 분석해주세요.
+"""
+                        else:  # 비교 모드
+                            prompt = f"""
+다음 두 계약서를 비교 분석해주세요:
+
+[검토 대상 계약서]
+{st.session_state.target_text[:2000]}
+
+[비교용 계약서]
+{st.session_state.reference_text[:2000]}
+
+다음 항목들을 중심으로 비교 분석해주세요:
+1. 주요 차이점과 유사점
+2. 검토 대상 계약서의 장단점
+3. 비교용 계약서 대비 개선 필요 사항
+4. 위험 요소 비교
+5. 권고사항
+
+한국어로 상세히 분석해주세요.
+"""
+                        
+                        response = client.chat.completions.create(
+                            model="gpt-4o",
+                            messages=[
+                                {"role": "system", "content": "당신은 계약서 검토 전문가입니다. 정확하고 실용적인 분석을 제공해주세요."},
+                                {"role": "user", "content": prompt}
+                            ],
+                            max_tokens=1500,
+                            temperature=0.3
+                        )
+                        
+                        st.session_state.analysis_result = response.choices[0].message.content
+                        st.session_state.processing_step = 4
+                        
+                    except Exception as ai_error:
+                        st.warning(f"AI 분석 중 오류: {str(ai_error)}")
                     
                     st.markdown("""
                     <div class="status success">
@@ -620,90 +665,23 @@ if st.session_state.categorized_clauses:
         </div>
         """, unsafe_allow_html=True)
 
-# AI Analysis section
-if st.session_state.target_text and st.session_state.processing_step >= 3:
-    ready_for_analysis = True
-    if st.session_state.mode == "compare" and not st.session_state.reference_text:
-        ready_for_analysis = False
+# 분석 결과 표시
+if st.session_state.analysis_result:
+    st.markdown("### 📊 AI 분석 결과")
+    st.markdown("---")
+    st.markdown(st.session_state.analysis_result)
+    st.markdown("---")
     
-    if ready_for_analysis:
-        if st.button("🤖 AI 분석 시작", type="primary", use_container_width=True):
-            with st.spinner("AI가 계약서를 분석하고 있습니다..."):
-                try:
-                    # 분석 프롬프트 준비
-                    if st.session_state.mode == "single":
-                        prompt = f"""
-다음 계약서를 전문적으로 분석해주세요:
-
-계약서 내용:
-{st.session_state.target_text[:4000]}
-
-다음 항목들을 중심으로 분석해주세요:
-1. 계약의 주요 목적과 범위
-2. 당사자의 권리와 의무
-3. 책임과 보상 조항
-4. 위험 요소와 주의사항
-5. 개선이 필요한 조항들
-6. 전반적인 평가 및 권고사항
-
-한국어로 상세히 분석해주세요.
-"""
-                    else:  # 비교 모드
-                        prompt = f"""
-다음 두 계약서를 비교 분석해주세요:
-
-[검토 대상 계약서]
-{st.session_state.target_text[:2000]}
-
-[비교용 계약서]
-{st.session_state.reference_text[:2000]}
-
-다음 항목들을 중심으로 비교 분석해주세요:
-1. 주요 차이점과 유사점
-2. 검토 대상 계약서의 장단점
-3. 비교용 계약서 대비 개선 필요 사항
-4. 위험 요소 비교
-5. 권고사항
-
-한국어로 상세히 분석해주세요.
-"""
-                    
-                    # OpenAI API 호출
-                    client = openai.OpenAI()
-                    response = client.chat.completions.create(
-                        model="gpt-4o",
-                        messages=[
-                            {"role": "system", "content": "당신은 계약서 검토 전문가입니다. 정확하고 실용적인 분석을 제공해주세요."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        max_tokens=1500,
-                        temperature=0.3
-                    )
-                    
-                    st.session_state.analysis_result = response.choices[0].message.content
-                    st.session_state.processing_step = 4
-                    
-                except Exception as e:
-                    st.error(f"❌ 분석 오류: {str(e)}")
-                    st.info("OpenAI API 키를 확인해주세요.")
-        
-        # 분석 결과 표시
-        if st.session_state.analysis_result:
-            st.markdown("### 📊 AI 분석 결과")
-            st.markdown("---")
-            st.markdown(st.session_state.analysis_result)
-            st.markdown("---")
-            
-            # 분석 결과 다운로드
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            analysis_filename = f"계약서_분석_{timestamp}.txt"
-            
-            st.download_button(
-                label="📥 분석 결과 다운로드",
-                data=st.session_state.analysis_result,
-                file_name=analysis_filename,
-                mime="text/plain",
-                use_container_width=True
-            )
+    # 분석 결과 다운로드
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    analysis_filename = f"계약서_분석_{timestamp}.txt"
+    
+    st.download_button(
+        label="📥 분석 결과 다운로드",
+        data=st.session_state.analysis_result,
+        file_name=analysis_filename,
+        mime="text/plain",
+        use_container_width=True
+    )
 
 st.markdown("</div></div>", unsafe_allow_html=True) 
