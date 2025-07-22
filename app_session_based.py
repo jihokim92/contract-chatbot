@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Clean, modern CSS inspired by the reference design
+# Clean, modern CSS
 st.markdown("""
 <style>
     /* Global styles */
@@ -34,6 +34,7 @@ st.markdown("""
         display: flex;
         justify-content: space-between;
         align-items: center;
+        margin-bottom: 2rem;
     }
     
     .banner-text {
@@ -58,72 +59,20 @@ st.markdown("""
     /* Main layout */
     .app-container {
         display: flex;
-        height: calc(100vh - 80px);
-    }
-    
-    /* Left sidebar */
-    .sidebar {
-        width: 80px;
-        background: white;
-        border-right: 1px solid #e2e8f0;
-        padding: 1rem 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-    }
-    
-    .nav-item {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        position: relative;
-        font-size: 1.2rem;
-    }
-    
-    .nav-item.active {
-        background: #eff6ff;
-        color: #3b82f6;
-    }
-    
-    .nav-item:hover:not(.active) {
-        background: #f1f5f9;
-    }
-    
-    .notification-badge {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        background: #ef4444;
-        color: white;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        font-size: 0.7rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    /* Main content area */
-    .main-content {
-        flex: 1;
-        display: flex;
-        background: #f8fafc;
+        gap: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
     }
     
     /* Left panel - Configuration */
     .config-panel {
         width: 400px;
         background: white;
-        border-right: 1px solid #e2e8f0;
+        border-radius: 12px;
         padding: 2rem;
-        overflow-y: auto;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        height: fit-content;
     }
     
     .panel-title {
@@ -247,8 +196,9 @@ st.markdown("""
     .preview-panel {
         flex: 1;
         background: white;
+        border-radius: 12px;
         padding: 2rem;
-        overflow-y: auto;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
     .preview-header {
@@ -351,21 +301,8 @@ st.markdown("""
     
     /* Responsive */
     @media (max-width: 1200px) {
-        .config-panel {
-            width: 350px;
-        }
-    }
-    
-    @media (max-width: 768px) {
         .app-container {
             flex-direction: column;
-        }
-        
-        .sidebar {
-            width: 100%;
-            height: 60px;
-            flex-direction: row;
-            justify-content: space-around;
         }
         
         .config-panel {
@@ -376,8 +313,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Initialize session state
-if 'current_page' not in st.session_state:
-    st.session_state.current_page = "home"
 if 'mode' not in st.session_state:
     st.session_state.mode = "single"
 if 'target_file' not in st.session_state:
@@ -406,54 +341,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Main app container
-st.markdown("""
-<div class="app-container">
-    <!-- Left Sidebar -->
-    <div class="sidebar">
-        <div class="nav-item active" onclick="document.querySelector('#home').click()">
-            🏠
-        </div>
-        <div class="nav-item" onclick="document.querySelector('#settings').click()">
-            ⚙️
-        </div>
-        <div class="nav-item" onclick="document.querySelector('#history').click()">
-            📋
-        </div>
-        <div class="nav-item" onclick="document.querySelector('#help').click()">
-            ❓
-        </div>
-        <div class="nav-item" onclick="document.querySelector('#notifications').click()">
-            🔔
-            <div class="notification-badge">2</div>
-        </div>
-    </div>
-    
-    <!-- Main Content -->
-    <div class="main-content">
-""", unsafe_allow_html=True)
-
-# Hidden navigation buttons
-col1, col2, col3, col4, col5 = st.columns(5)
-with col1:
-    if st.button("Home", key="home", help="홈"):
-        st.session_state.current_page = "home"
-        st.rerun()
-with col2:
-    if st.button("Settings", key="settings", help="설정"):
-        st.session_state.current_page = "settings"
-        st.rerun()
-with col3:
-    if st.button("History", key="history", help="기록"):
-        st.session_state.current_page = "history"
-        st.rerun()
-with col4:
-    if st.button("Help", key="help", help="도움말"):
-        st.session_state.current_page = "help"
-        st.rerun()
-with col5:
-    if st.button("Notifications", key="notifications", help="알림"):
-        st.session_state.current_page = "notifications"
-        st.rerun()
+st.markdown('<div class="app-container">', unsafe_allow_html=True)
 
 # Left Configuration Panel
 st.markdown("""
@@ -496,7 +384,7 @@ with col2:
 st.markdown("""
 <div class="upload-section">
     <h4>📄 계약서 업로드</h4>
-    <div class="upload-area" onclick="document.querySelector('#file_uploader').click()">
+    <div class="upload-area">
         <div class="upload-icon">📁</div>
         <div class="upload-text">클릭하여 계약서 선택 (PDF)</div>
     </div>
@@ -827,4 +715,4 @@ if st.session_state.target_text and st.session_state.processing_step >= 3:
             
             st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown("</div></div></div>", unsafe_allow_html=True) 
+st.markdown("</div></div>", unsafe_allow_html=True) 
