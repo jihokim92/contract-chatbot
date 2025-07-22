@@ -363,22 +363,20 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Hidden mode buttons
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("Single", key="single_mode", help="단독 검토"):
-        st.session_state.mode = "single"
-        st.session_state.processing_step = 0
-        st.session_state.categorized_clauses = None
-        st.session_state.analysis_result = None
-        st.rerun()
-with col2:
-    if st.button("Compare", key="compare_mode", help="비교 검토"):
-        st.session_state.mode = "compare"
-        st.session_state.processing_step = 0
-        st.session_state.categorized_clauses = None
-        st.session_state.analysis_result = None
-        st.rerun()
+# Hidden mode buttons (simplified)
+if st.button("", key="single_mode", help="단독 검토", label_visibility="collapsed"):
+    st.session_state.mode = "single"
+    st.session_state.processing_step = 0
+    st.session_state.categorized_clauses = None
+    st.session_state.analysis_result = None
+    st.rerun()
+
+if st.button("", key="compare_mode", help="비교 검토", label_visibility="collapsed"):
+    st.session_state.mode = "compare"
+    st.session_state.processing_step = 0
+    st.session_state.categorized_clauses = None
+    st.session_state.analysis_result = None
+    st.rerun()
 
 # File upload section
 st.markdown("""
@@ -594,29 +592,26 @@ if st.session_state.categorized_clauses:
     for category, clause_numbers in categorized["categories"].items():
         if clause_numbers:
             total_clauses += len(clause_numbers)
-            st.markdown(f"""
-            <div class="category-section">
-                <div class="category-title">
-                    📂 {category} ({len(clause_numbers)}개)
-                </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f"### 📂 {category} ({len(clause_numbers)}개)")
+            st.markdown("---")
             
             for clause_num in clause_numbers:
                 if clause_num in clauses_dict:
                     clause = clauses_dict[clause_num]
-                    st.markdown(f"""
-                    <div class="clause-item">
-                        <div class="clause-header">{clause['number']}</div>
-                        <div class="clause-text">
-                            {clause['text'][:100]}{'...' if len(clause['text']) > 100 else ''}
-                        </div>
-                        {f'''
-                        <div class="clause-translation">
-                            🇰🇷 {clause['translated'][:100]}{'...' if len(clause['translated']) > 100 else ''}
-                        </div>
-                        ''' if clause.get('translated') else ''}
-                    </div>
-                    """, unsafe_allow_html=True)
+                    
+                    # 조항 번호
+                    st.markdown(f"**{clause['number']}**", unsafe_allow_html=True)
+                    
+                    # 조항 텍스트
+                    clause_text = clause['text'][:150] + ('...' if len(clause['text']) > 150 else '')
+                    st.markdown(f"<div style='color: #475569; font-size: 0.9rem; line-height: 1.4; margin-bottom: 0.5rem;'>{clause_text}</div>", unsafe_allow_html=True)
+                    
+                    # 번역된 텍스트 (있는 경우)
+                    if clause.get('translated'):
+                        translated_text = clause['translated'][:150] + ('...' if len(clause['translated']) > 150 else '')
+                        st.markdown(f"<div style='color: #059669; font-style: italic; font-size: 0.9rem;'>🇰🇷 {translated_text}</div>", unsafe_allow_html=True)
+                    
+                    st.markdown("---")
     
     if total_clauses == 0:
         st.markdown("""
@@ -694,12 +689,10 @@ if st.session_state.target_text and st.session_state.processing_step >= 3:
         
         # 분석 결과 표시
         if st.session_state.analysis_result:
-            st.markdown("""
-            <div class="analysis-box">
-                <h4>📊 AI 분석 결과</h4>
-            """, unsafe_allow_html=True)
-            
+            st.markdown("### 📊 AI 분석 결과")
+            st.markdown("---")
             st.markdown(st.session_state.analysis_result)
+            st.markdown("---")
             
             # 분석 결과 다운로드
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -712,7 +705,5 @@ if st.session_state.target_text and st.session_state.processing_step >= 3:
                 mime="text/plain",
                 use_container_width=True
             )
-            
-            st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("</div></div>", unsafe_allow_html=True) 
