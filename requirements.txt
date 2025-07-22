@@ -7,4 +7,4 @@ PyPDF2
 python-dotenv
 unstructured
 pdfminer.six
-pymupdf
+pymupdf 
