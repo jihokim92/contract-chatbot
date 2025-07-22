@@ -9,285 +9,364 @@ import re
 
 # Page configuration
 st.set_page_config(
-    page_title="📋 계약서 검토 시스템",
+    page_title="📋 Contract Review System",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Clean, minimal CSS
+# Modern CSS with clean design
 st.markdown("""
 <style>
-    /* Reset and base styles */
+    /* Global styles */
     .main {
-        padding: 2rem;
-        background: #fafafa;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 0;
     }
     
     /* Header */
-    .header {
-        background: white;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
+    .hero-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 3rem 2rem;
         text-align: center;
-        border-left: 4px solid #2563eb;
+        border-radius: 0 0 30px 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
     }
     
-    .header h1 {
-        color: #1f2937;
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
     }
     
-    .header p {
+    .hero-subtitle {
         color: #6b7280;
-        font-size: 1.1rem;
-        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 400;
+    }
+    
+    /* Main container */
+    .main-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
     }
     
     /* Mode selector */
     .mode-selector {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         margin-bottom: 2rem;
+    }
+    
+    .mode-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    .mode-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        border: 2px solid #e5e7eb;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .mode-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        border-color: #667eea;
+    }
+    
+    .mode-card.active {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #f8faff 0%, #e8f0ff 100%);
+    }
+    
+    .mode-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
     }
     
     .mode-title {
+        font-size: 1.5rem;
+        font-weight: 700;
         color: #1f2937;
-        font-size: 1.3rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        margin-bottom: 0.5rem;
     }
     
-    .mode-buttons {
-        display: flex;
-        gap: 1rem;
-    }
-    
-    .mode-btn {
-        flex: 1;
-        padding: 1rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        background: white;
+    .mode-desc {
         color: #6b7280;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-align: center;
+        font-size: 0.95rem;
+        line-height: 1.5;
     }
     
-    .mode-btn:hover {
-        border-color: #2563eb;
-        color: #2563eb;
-    }
-    
-    .mode-btn.active {
-        border-color: #2563eb;
-        background: #eff6ff;
-        color: #2563eb;
-    }
-    
+    /* Current mode indicator */
     .current-mode {
-        background: #f0f9ff;
-        border: 1px solid #0ea5e9;
-        color: #0369a1;
-        padding: 0.8rem 1rem;
-        border-radius: 8px;
-        margin: 1rem 0;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-align: center;
+        margin: 2rem 0;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
     }
     
-    /* Content containers */
-    .content-box {
-        background: white;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    /* Content sections */
+    .content-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         margin-bottom: 2rem;
     }
     
-    .content-title {
+    .section-title {
+        font-size: 2rem;
+        font-weight: 700;
         color: #1f2937;
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        border-bottom: 2px solid #f3f4f6;
-        padding-bottom: 0.5rem;
+        gap: 1rem;
     }
     
-    /* Status indicators */
-    .status-success {
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        color: #166534;
-        padding: 1rem;
-        border-radius: 8px;
+    /* Upload area */
+    .upload-area {
+        border: 3px dashed #667eea;
+        border-radius: 16px;
+        padding: 3rem;
+        text-align: center;
+        background: linear-gradient(135deg, #f8faff 0%, #e8f0ff 100%);
+        transition: all 0.3s ease;
+        margin: 2rem 0;
+    }
+    
+    .upload-area:hover {
+        border-color: #764ba2;
+        background: linear-gradient(135deg, #f0f4ff 0%, #e0e8ff 100%);
+    }
+    
+    .upload-icon {
+        font-size: 4rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+    
+    .upload-text {
+        font-size: 1.2rem;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    
+    .upload-hint {
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+    
+    /* Status cards */
+    .status-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
         margin: 1rem 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        border-left: 4px solid;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .status-success {
+        border-left-color: #10b981;
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
     }
     
     .status-info {
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
-        color: #1e40af;
-        padding: 1rem;
-        border-radius: 8px;
-        margin: 1rem 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        border-left-color: #3b82f6;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
     }
     
     .status-warning {
-        background: #fffbeb;
-        border: 1px solid #fed7aa;
-        color: #92400e;
-        padding: 1rem;
-        border-radius: 8px;
-        margin: 1rem 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        border-left-color: #f59e0b;
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
     }
     
     /* Progress steps */
     .progress-container {
-        background: #f9fafb;
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin: 1rem 0;
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin: 2rem 0;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 2rem 0;
     }
     
     .progress-step {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 0.8rem;
-        padding: 0.8rem;
-        margin: 0.5rem 0;
-        border-radius: 6px;
-        background: white;
-        border-left: 3px solid #d1d5db;
+        flex: 1;
+        position: relative;
     }
     
-    .progress-step.completed {
-        border-left-color: #10b981;
-        background: #f0fdf4;
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
     }
     
-    .progress-step.pending {
-        border-left-color: #f59e0b;
-        background: #fffbeb;
+    .step-circle.completed {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .step-circle.pending {
+        background: #f3f4f6;
+        color: #9ca3af;
+        border: 2px solid #e5e7eb;
+    }
+    
+    .step-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #6b7280;
+        text-align: center;
+    }
+    
+    .step-label.completed {
+        color: #10b981;
+        font-weight: 600;
     }
     
     /* Category display */
-    .category-section {
-        background: #f8fafc;
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin: 1rem 0;
-        border-left: 4px solid #10b981;
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
     }
     
-    .category-title {
-        color: #065f46;
+    .category-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    
+    .category-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
         font-size: 1.2rem;
         font-weight: 600;
-        margin-bottom: 1rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
     
-    .clause-card {
-        background: white;
+    .category-content {
+        padding: 1.5rem;
+    }
+    
+    .clause-item {
+        background: #f8fafc;
         padding: 1rem;
         border-radius: 8px;
         margin: 0.8rem 0;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-left: 3px solid #667eea;
     }
     
-    .clause-number {
-        color: #2563eb;
+    .clause-header {
         font-weight: 600;
-        font-size: 1.1rem;
+        color: #2563eb;
         margin-bottom: 0.8rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid #f3f4f6;
+        font-size: 1.1rem;
     }
     
-    .text-block {
-        margin: 0.8rem 0;
+    .text-content {
+        background: white;
         padding: 0.8rem;
         border-radius: 6px;
-        border-left: 3px solid #d1d5db;
-    }
-    
-    .text-original {
-        background: #f9fafb;
-        border-left-color: #6b7280;
-    }
-    
-    .text-translated {
-        background: #f0fdf4;
-        border-left-color: #10b981;
+        margin: 0.5rem 0;
+        border: 1px solid #e5e7eb;
     }
     
     .text-label {
         font-weight: 600;
-        font-size: 0.9rem;
-        margin-bottom: 0.5rem;
-        color: #374151;
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 0.3rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
-    /* Buttons */
-    .primary-btn {
-        background: #2563eb;
+    /* Action buttons */
+    .action-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
-        padding: 1rem 2rem;
-        border-radius: 8px;
+        padding: 1.2rem 2.5rem;
+        border-radius: 12px;
+        font-size: 1.1rem;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
         width: 100%;
         margin: 1rem 0;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
     }
     
-    .primary-btn:hover {
-        background: #1d4ed8;
-        transform: translateY(-1px);
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
     }
     
-    .primary-btn:disabled {
+    .action-btn:disabled {
         background: #9ca3af;
         cursor: not-allowed;
         transform: none;
+        box-shadow: none;
     }
     
     /* Analysis result */
     .analysis-result {
-        background: #f8fafc;
-        padding: 1.5rem;
-        border-radius: 8px;
-        margin: 1rem 0;
-        border-left: 4px solid #2563eb;
+        background: linear-gradient(135deg, #f8faff 0%, #e8f0ff 100%);
+        padding: 2rem;
+        border-radius: 16px;
+        margin: 2rem 0;
+        border-left: 4px solid #667eea;
     }
     
     /* Hide Streamlit elements */
@@ -299,16 +378,20 @@ st.markdown("""
         width: 100%;
     }
     
-    /* Debug info */
-    .debug-info {
-        background: #fef3c7;
-        border: 1px solid #f59e0b;
-        color: #92400e;
-        padding: 1rem;
-        border-radius: 8px;
-        margin: 1rem 0;
-        font-family: monospace;
-        font-size: 0.9rem;
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .mode-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .category-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .progress-steps {
+            flex-direction: column;
+            gap: 1rem;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -327,34 +410,41 @@ if 'analysis_result' not in st.session_state:
 if 'debug_info' not in st.session_state:
     st.session_state.debug_info = []
 
-# Main header
+# Hero header
 st.markdown("""
-<div class="header">
-    <h1>📋 계약서 검토 시스템</h1>
-    <p>🔒 세션 기반 보안 | 🌍 다국어 지원 | 🤖 AI 분석</p>
+<div class="hero-header">
+    <div class="hero-title">📋 Contract Review System</div>
+    <div class="hero-subtitle">AI-powered contract analysis with multilingual support</div>
 </div>
 """, unsafe_allow_html=True)
 
+# Main container
+st.markdown('<div class="main-container">', unsafe_allow_html=True)
+
 # Sidebar for API key check
 with st.sidebar:
-    st.header("🔑 API 설정")
+    st.header("🔑 API Settings")
     api_key = os.getenv("OPENAI_API_KEY")
     if api_key:
-        st.success("✅ OpenAI API 키 설정됨")
+        st.success("✅ OpenAI API Key Configured")
     else:
-        st.error("❌ OpenAI API 키 필요")
-        st.info("Streamlit Secrets에서 OPENAI_API_KEY 설정")
+        st.error("❌ OpenAI API Key Required")
+        st.info("Set OPENAI_API_KEY in Streamlit Secrets")
 
 # Mode selection
 st.markdown("""
 <div class="mode-selector">
-    <div class="mode-title">🎯 검토 모드 선택</div>
-    <div class="mode-buttons">
-        <div class="mode-btn" onclick="document.querySelector('#mode1').click()">
-            🔍 단독 검토<br><small>계약서 하나만 분석</small>
+    <div class="section-title">🎯 Select Review Mode</div>
+    <div class="mode-grid">
+        <div class="mode-card" onclick="document.querySelector('#mode1').click()">
+            <div class="mode-icon">🔍</div>
+            <div class="mode-title">Single Review</div>
+            <div class="mode-desc">Analyze one contract with AI-powered insights</div>
         </div>
-        <div class="mode-btn" onclick="document.querySelector('#mode2').click()">
-            📚 비교 검토<br><small>두 계약서 비교 분석</small>
+        <div class="mode-card" onclick="document.querySelector('#mode2').click()">
+            <div class="mode-icon">📚</div>
+            <div class="mode-title">Compare Review</div>
+            <div class="mode-desc">Compare two contracts and identify differences</div>
         </div>
     </div>
 </div>
@@ -363,7 +453,7 @@ st.markdown("""
 # Mode selection buttons (hidden)
 col1, col2 = st.columns(2)
 with col1:
-    if st.button("Mode 1", key="mode1", help="단독 검토 모드"):
+    if st.button("Mode 1", key="mode1", help="Single Review Mode"):
         st.session_state.review_mode = "standalone"
         st.session_state.processing_complete = False
         st.session_state.analysis_result = None
@@ -371,7 +461,7 @@ with col1:
         st.rerun()
 
 with col2:
-    if st.button("Mode 2", key="mode2", help="비교 검토 모드"):
+    if st.button("Mode 2", key="mode2", help="Compare Review Mode"):
         st.session_state.review_mode = "comparison"
         st.session_state.processing_complete = False
         st.session_state.analysis_result = None
@@ -379,21 +469,26 @@ with col2:
         st.rerun()
 
 # Display current mode
-current_mode = "단독 검토" if st.session_state.review_mode == "standalone" else "비교 검토"
+current_mode = "Single Review" if st.session_state.review_mode == "standalone" else "Compare Review"
 st.markdown(f"""
 <div class="current-mode">
-    🎯 현재 모드: {current_mode}
+    🎯 Current Mode: {current_mode}
 </div>
 """, unsafe_allow_html=True)
 
 # File upload section
 st.markdown("""
-<div class="content-box">
-    <div class="content-title">📄 계약서 업로드</div>
+<div class="content-section">
+    <div class="section-title">📄 Upload Contract</div>
+    <div class="upload-area">
+        <div class="upload-icon">📁</div>
+        <div class="upload-text">Drag and drop your contract here</div>
+        <div class="upload-hint">or click to browse files (PDF only)</div>
+    </div>
 """, unsafe_allow_html=True)
 
 def extract_text_from_pdf(pdf_file):
-    """PDF에서 텍스트 추출"""
+    """Extract text from PDF"""
     try:
         pdf_reader = PdfReader(pdf_file)
         text = ""
@@ -401,22 +496,22 @@ def extract_text_from_pdf(pdf_file):
             text += page.extract_text() + "\n"
         return text.strip()
     except Exception as e:
-        st.error(f"PDF 읽기 오류: {str(e)}")
+        st.error(f"PDF reading error: {str(e)}")
         return None
 
 def extract_clauses_from_text(text):
-    """텍스트에서 조항 추출"""
+    """Extract clauses from text"""
     if not text:
         return []
     
-    # 조항 패턴 매칭 (숫자. 로 시작하는 섹션)
+    # Improved clause pattern matching
     clauses = re.split(r'\n\s*(?=\d+\.)', text)
     extracted_clauses = []
     
     for i, clause in enumerate(clauses):
         clause = clause.strip()
-        if clause and len(clause) > 20:  # 최소 길이 체크
-            # 조항 번호 추출
+        if clause and len(clause) > 20:
+            # Extract clause number
             match = re.match(r'^(\d+\.?\s*)(.*)', clause, re.DOTALL)
             if match:
                 clause_num = match.group(1).strip()
@@ -436,55 +531,55 @@ def extract_clauses_from_text(text):
     return extracted_clauses
 
 def translate_clause_to_korean(text, client):
-    """개별 조항을 한국어로 번역"""
+    """Translate individual clause to Korean"""
     try:
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "당신은 전문 번역가입니다. 계약서 조항을 자연스러운 한국어로 번역해주세요."},
-                {"role": "user", "content": f"다음 계약서 조항을 한국어로 번역해주세요:\n\n{text[:1000]}"}
+                {"role": "system", "content": "You are a professional translator. Translate the contract clause into natural Korean."},
+                {"role": "user", "content": f"Translate this contract clause to Korean:\n\n{text[:1000]}"}
             ],
             max_tokens=500,
             temperature=0.3
         )
         return response.choices[0].message.content
     except Exception as e:
-        return f"번역 오류: {str(e)}"
+        return f"Translation error: {str(e)}"
 
 def categorize_clauses(clauses, client):
-    """조항들을 카테고리별로 분류"""
+    """Categorize clauses by type"""
     try:
-        # 모든 조항 텍스트를 하나로 합치기
-        all_clauses_text = "\n\n".join([f"{clause['number']}: {clause['text'][:200]}" for clause in clauses[:10]])
+        # Create a more structured prompt
+        all_clauses_text = "\n\n".join([f"{clause['number']}: {clause['text'][:200]}" for clause in clauses[:8]])
         
         prompt = f"""
-다음 계약서 조항들을 카테고리별로 분류해주세요:
+Analyze these contract clauses and categorize them:
 
 {all_clauses_text}
 
-다음 카테고리로 분류해주세요:
-1. 계약 목적 및 범위
-2. 당사자 권리와 의무
-3. 정산 및 지급 조건
-4. 지적재산권
-5. 기밀유지
-6. 계약 해지
-7. 책임 및 면책
-8. 분쟁해결
-9. 기타
+Categorize into these types:
+1. Purpose & Scope
+2. Rights & Obligations  
+3. Payment & Settlement
+4. Intellectual Property
+5. Confidentiality
+6. Termination
+7. Liability & Indemnification
+8. Dispute Resolution
+9. Others
 
-JSON 형태로 응답해주세요:
+Return as JSON:
 {{
     "categories": {{
-        "계약 목적 및 범위": ["조항번호"],
-        "당사자 권리와 의무": ["조항번호"],
-        "정산 및 지급 조건": ["조항번호"],
-        "지적재산권": ["조항번호"],
-        "기밀유지": ["조항번호"],
-        "계약 해지": ["조항번호"],
-        "책임 및 면책": ["조항번호"],
-        "분쟁해결": ["조항번호"],
-        "기타": ["조항번호"]
+        "Purpose & Scope": ["clause_numbers"],
+        "Rights & Obligations": ["clause_numbers"],
+        "Payment & Settlement": ["clause_numbers"],
+        "Intellectual Property": ["clause_numbers"],
+        "Confidentiality": ["clause_numbers"],
+        "Termination": ["clause_numbers"],
+        "Liability & Indemnification": ["clause_numbers"],
+        "Dispute Resolution": ["clause_numbers"],
+        "Others": ["clause_numbers"]
     }}
 }}
 """
@@ -492,7 +587,7 @@ JSON 형태로 응답해주세요:
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "당신은 계약서 분석 전문가입니다. 조항들을 정확하게 카테고리별로 분류해주세요."},
+                {"role": "system", "content": "You are a contract analysis expert. Categorize clauses accurately."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=1000,
@@ -500,49 +595,62 @@ JSON 형태로 응답해주세요:
         )
         
         result = response.choices[0].message.content
-        st.session_state.debug_info.append(f"GPT 응답: {result[:200]}...")
+        st.session_state.debug_info.append(f"GPT Response: {result[:200]}...")
         
-        # JSON 파싱 시도
+        # JSON parsing
         try:
             json_start = result.find('{')
             json_end = result.rfind('}') + 1
             if json_start != -1 and json_end != -1:
                 json_str = result[json_start:json_end]
                 categorized = json.loads(json_str)
-                st.session_state.debug_info.append(f"JSON 파싱 성공: {len(categorized.get('categories', {}))}개 카테고리")
+                st.session_state.debug_info.append(f"JSON parsing successful: {len(categorized.get('categories', {}))} categories")
                 return categorized
         except Exception as e:
-            st.session_state.debug_info.append(f"JSON 파싱 실패: {str(e)}")
+            st.session_state.debug_info.append(f"JSON parsing failed: {str(e)}")
         
-        # 기본 분류
+        # Fallback categorization
         default_categories = {
             "categories": {
-                "계약 목적 및 범위": [],
-                "당사자 권리와 의무": [],
-                "정산 및 지급 조건": [],
-                "지적재산권": [],
-                "기밀유지": [],
-                "계약 해지": [],
-                "책임 및 면책": [],
-                "분쟁해결": [],
-                "기타": []
+                "Purpose & Scope": [],
+                "Rights & Obligations": [],
+                "Payment & Settlement": [],
+                "Intellectual Property": [],
+                "Confidentiality": [],
+                "Termination": [],
+                "Liability & Indemnification": [],
+                "Dispute Resolution": [],
+                "Others": []
             }
         }
         
-        # 기본 분류 로직: 첫 번째 조항을 "계약 목적 및 범위"에 넣기
+        # Simple categorization logic
         if clauses:
-            default_categories["categories"]["계약 목적 및 범위"].append(clauses[0]["number"])
-            st.session_state.debug_info.append(f"기본 분류: {clauses[0]['number']}을 계약 목적에 추가")
+            # First clause is usually purpose/scope
+            default_categories["categories"]["Purpose & Scope"].append(clauses[0]["number"])
+            
+            # Distribute remaining clauses
+            for i, clause in enumerate(clauses[1:4]):
+                if "payment" in clause["text"].lower() or "fee" in clause["text"].lower():
+                    default_categories["categories"]["Payment & Settlement"].append(clause["number"])
+                elif "confidential" in clause["text"].lower() or "secret" in clause["text"].lower():
+                    default_categories["categories"]["Confidentiality"].append(clause["number"])
+                elif "terminate" in clause["text"].lower() or "end" in clause["text"].lower():
+                    default_categories["categories"]["Termination"].append(clause["number"])
+                else:
+                    default_categories["categories"]["Rights & Obligations"].append(clause["number"])
+            
+            st.session_state.debug_info.append(f"Fallback categorization applied")
         
         return default_categories
         
     except Exception as e:
-        st.session_state.debug_info.append(f"카테고리 분류 오류: {str(e)}")
+        st.session_state.debug_info.append(f"Categorization error: {str(e)}")
         return None
 
 # Target contract upload
 target_file = st.file_uploader(
-    "검토할 계약서를 업로드하세요",
+    "Upload contract to review",
     type=['pdf'],
     key="target_uploader"
 )
@@ -563,15 +671,15 @@ if target_file:
         
         st.markdown(f"""
         <div class="status-success">
-            ✅ {target_file.name} 업로드 완료<br>
-            📊 추출된 조항 수: {len(st.session_state.target_contract['clauses'])}
+            ✅ {target_file.name} uploaded successfully<br>
+            📊 Extracted {len(st.session_state.target_contract['clauses'])} clauses
         </div>
         """, unsafe_allow_html=True)
 
 # Reference contract upload (only for comparison mode)
 if st.session_state.review_mode == "comparison":
     reference_file = st.file_uploader(
-        "비교할 레퍼런스 계약서를 업로드하세요",
+        "Upload reference contract for comparison",
         type=['pdf'],
         key="reference_uploader"
     )
@@ -591,8 +699,8 @@ if st.session_state.review_mode == "comparison":
             
             st.markdown(f"""
             <div class="status-success">
-                ✅ {reference_file.name} 업로드 완료<br>
-                📊 추출된 조항 수: {len(st.session_state.reference_contract['clauses'])}
+                ✅ {reference_file.name} uploaded successfully<br>
+                📊 Extracted {len(st.session_state.reference_contract['clauses'])} clauses
             </div>
             """, unsafe_allow_html=True)
 
@@ -601,8 +709,8 @@ st.markdown("</div>", unsafe_allow_html=True)
 # Processing section
 if st.session_state.target_contract and st.session_state.target_contract["text"]:
     st.markdown("""
-    <div class="content-box">
-        <div class="content-title">🚀 처리 및 분석</div>
+    <div class="content-section">
+        <div class="section-title">🚀 Process & Analyze</div>
     """, unsafe_allow_html=True)
     
     # Check if ready for processing
@@ -612,80 +720,80 @@ if st.session_state.target_contract and st.session_state.target_contract["text"]
             ready_for_processing = False
             st.markdown("""
             <div class="status-warning">
-                ⚠️ 비교 검토를 위해서는 레퍼런스 계약서도 업로드해주세요.
+                ⚠️ Please upload a reference contract for comparison review.
             </div>
             """, unsafe_allow_html=True)
     
     if ready_for_processing:
-        if st.button("🌍 번역 및 분류 시작", type="primary", use_container_width=True, disabled=st.session_state.processing_complete):
-            with st.spinner("번역 및 카테고리 분류를 진행하고 있습니다..."):
+        if st.button("🌍 Start Translation & Categorization", type="primary", use_container_width=True, disabled=st.session_state.processing_complete):
+            with st.spinner("Processing translation and categorization..."):
                 try:
                     client = openai.OpenAI()
                     
-                    # 번역 및 카테고리 분류
+                    # Translation and categorization
                     clauses = st.session_state.target_contract["clauses"]
                     
-                    # 각 조항 번역
-                    for i, clause in enumerate(clauses[:5]):  # 최대 5개 조항만 번역
+                    # Translate clauses
+                    for i, clause in enumerate(clauses[:6]):  # Translate up to 6 clauses
                         clause["translated_text"] = translate_clause_to_korean(clause["text"], client)
-                        st.session_state.debug_info.append(f"조항 {clause['number']} 번역 완료")
+                        st.session_state.debug_info.append(f"Clause {clause['number']} translated")
                     
-                    # 카테고리 분류
+                    # Categorize clauses
                     categorized = categorize_clauses(clauses, client)
                     st.session_state.target_contract["categorized_clauses"] = categorized
                     st.session_state.processing_complete = True
                     
                     st.markdown("""
                     <div class="status-success">
-                        ✅ 번역 및 분류 완료!
+                        ✅ Translation and categorization completed!
                     </div>
                     """, unsafe_allow_html=True)
                     
                 except Exception as e:
-                    st.error(f"❌ 처리 중 오류가 발생했습니다: {str(e)}")
+                    st.error(f"❌ Processing error: {str(e)}")
     
     # Display progress
     if st.session_state.target_contract:
         st.markdown("""
         <div class="progress-container">
-            <h4>📋 처리 현황</h4>
+            <div class="section-title">📋 Processing Status</div>
+            <div class="progress-steps">
         """, unsafe_allow_html=True)
         
         steps = [
-            ("파일 업로드", True),
-            ("조항 추출", bool(st.session_state.target_contract.get("clauses"))),
-            ("번역 및 분류", st.session_state.processing_complete),
-            ("AI 분석", bool(st.session_state.analysis_result))
+            ("Upload", True),
+            ("Extract", bool(st.session_state.target_contract.get("clauses"))),
+            ("Process", st.session_state.processing_complete),
+            ("Analyze", bool(st.session_state.analysis_result))
         ]
         
         for step_name, completed in steps:
             status_class = "completed" if completed else "pending"
-            icon = "✅" if completed else "⏳"
             st.markdown(f"""
-            <div class="progress-step {status_class}">
-                {icon} {step_name}
+            <div class="progress-step">
+                <div class="step-circle {status_class}">
+                    {'✓' if completed else '○'}
+                </div>
+                <div class="step-label {status_class}">{step_name}</div>
             </div>
             """, unsafe_allow_html=True)
         
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
     
     st.markdown("</div>", unsafe_allow_html=True)
 
 # Debug information
 if st.session_state.debug_info:
-    with st.expander("🔍 디버그 정보", expanded=False):
-        st.markdown("""
-        <div class="debug-info">
-        """, unsafe_allow_html=True)
+    with st.expander("🔍 Debug Information", expanded=False):
         for info in st.session_state.debug_info:
             st.write(info)
-        st.markdown("</div>", unsafe_allow_html=True)
 
 # Display categorized clauses
 if st.session_state.processing_complete and st.session_state.target_contract.get("categorized_clauses"):
     st.markdown("""
-    <div class="content-box">
-        <div class="content-title">📂 카테고리별 조항 분류</div>
+    <div class="content-section">
+        <div class="section-title">📂 Categorized Clauses</div>
+        <div class="category-grid">
     """, unsafe_allow_html=True)
     
     categorized = st.session_state.target_contract["categorized_clauses"]
@@ -696,47 +804,50 @@ if st.session_state.processing_complete and st.session_state.target_contract.get
         if clause_numbers:
             total_clauses += len(clause_numbers)
             st.markdown(f"""
-            <div class="category-section">
-                <div class="category-title">
-                    📂 {category} ({len(clause_numbers)}개 조항)
+            <div class="category-card">
+                <div class="category-header">
+                    📂 {category} ({len(clause_numbers)})
                 </div>
+                <div class="category-content">
             """, unsafe_allow_html=True)
             
             for clause_num in clause_numbers:
                 if clause_num in clauses_dict:
                     clause = clauses_dict[clause_num]
                     st.markdown(f"""
-                    <div class="clause-card">
-                        <div class="clause-number">{clause['number']}</div>
+                    <div class="clause-item">
+                        <div class="clause-header">{clause['number']}</div>
                         
-                        <div class="text-block text-original">
-                            <div class="text-label">🌍 원문:</div>
-                            {clause['text'][:150]}{'...' if len(clause['text']) > 150 else ''}
+                        <div class="text-content">
+                            <div class="text-label">🌍 Original</div>
+                            {clause['text'][:120]}{'...' if len(clause['text']) > 120 else ''}
                         </div>
                         
                         {f'''
-                        <div class="text-block text-translated">
-                            <div class="text-label">🇰🇷 한국어:</div>
-                            {clause['translated_text'][:150]}{'...' if len(clause['translated_text']) > 150 else ''}
+                        <div class="text-content">
+                            <div class="text-label">🇰🇷 Korean</div>
+                            {clause['translated_text'][:120]}{'...' if len(clause['translated_text']) > 120 else ''}
                         </div>
                         ''' if clause.get('translated_text') else ''}
                     </div>
                     """, unsafe_allow_html=True)
+            
+            st.markdown("</div></div>", unsafe_allow_html=True)
     
     if total_clauses == 0:
         st.markdown("""
         <div class="status-warning">
-            ⚠️ 분류된 조항이 없습니다. 디버그 정보를 확인해주세요.
+            ⚠️ No clauses were categorized. Please check debug information.
         </div>
         """, unsafe_allow_html=True)
     
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div></div>", unsafe_allow_html=True)
 
 # Analysis section
 if st.session_state.target_contract and st.session_state.target_contract["text"]:
     st.markdown("""
-    <div class="content-box">
-        <div class="content-title">🤖 AI 분석</div>
+    <div class="content-section">
+        <div class="section-title">🤖 AI Analysis</div>
     """, unsafe_allow_html=True)
     
     # Check if ready for analysis
@@ -746,50 +857,50 @@ if st.session_state.target_contract and st.session_state.target_contract["text"]
             ready_for_analysis = False
             st.markdown("""
             <div class="status-warning">
-                ⚠️ 비교 검토를 위해서는 레퍼런스 계약서도 업로드해주세요.
+                ⚠️ Please upload a reference contract for comparison review.
             </div>
             """, unsafe_allow_html=True)
     
     if ready_for_analysis:
-        if st.button("🚀 AI 분석 시작", type="primary", use_container_width=True):
-            with st.spinner("AI가 계약서를 분석하고 있습니다..."):
+        if st.button("🚀 Start AI Analysis", type="primary", use_container_width=True):
+            with st.spinner("AI is analyzing the contract..."):
                 try:
                     # Prepare analysis prompt
                     if st.session_state.review_mode == "standalone":
                         prompt = f"""
-다음 계약서를 전문적으로 분석해주세요:
+Analyze this contract professionally:
 
-계약서 내용:
+Contract content:
 {st.session_state.target_contract["text"][:6000]}
 
-다음 항목들을 중심으로 분석해주세요:
-1. 계약의 주요 목적과 범위
-2. 당사자의 권리와 의무
-3. 책임과 보상 조항
-4. 위험 요소와 주의사항
-5. 개선이 필요한 조항들
-6. 전반적인 평가 및 권고사항
+Analyze the following aspects:
+1. Contract purpose and scope
+2. Rights and obligations of parties
+3. Payment and settlement terms
+4. Risk factors and considerations
+5. Areas needing improvement
+6. Overall assessment and recommendations
 
-한국어로 상세히 분석해주세요.
+Provide analysis in Korean.
 """
                     else:  # comparison mode
                         prompt = f"""
-다음 두 계약서를 비교 분석해주세요:
+Compare these two contracts:
 
-[검토 대상 계약서]
+[Target Contract]
 {st.session_state.target_contract["text"][:3000]}
 
-[레퍼런스 계약서]
+[Reference Contract]
 {st.session_state.reference_contract["text"][:3000]}
 
-다음 항목들을 중심으로 비교 분석해주세요:
-1. 주요 차이점과 유사점
-2. 검토 대상 계약서의 장단점
-3. 레퍼런스 대비 개선 필요 사항
-4. 위험 요소 비교
-5. 권고사항
+Compare the following aspects:
+1. Key differences and similarities
+2. Pros and cons of target contract
+3. Areas for improvement compared to reference
+4. Risk factor comparison
+5. Recommendations
 
-한국어로 상세히 분석해주세요.
+Provide analysis in Korean.
 """
                     
                     # Call OpenAI API
@@ -797,7 +908,7 @@ if st.session_state.target_contract and st.session_state.target_contract["text"]
                     response = client.chat.completions.create(
                         model="gpt-4o",
                         messages=[
-                            {"role": "system", "content": "당신은 계약서 검토 전문가입니다. 정확하고 실용적인 분석을 제공해주세요."},
+                            {"role": "system", "content": "You are a contract review expert. Provide accurate and practical analysis."},
                             {"role": "user", "content": prompt}
                         ],
                         max_tokens=2000,
@@ -807,24 +918,24 @@ if st.session_state.target_contract and st.session_state.target_contract["text"]
                     st.session_state.analysis_result = response.choices[0].message.content
                     
                 except Exception as e:
-                    st.error(f"❌ 분석 중 오류가 발생했습니다: {str(e)}")
-                    st.info("OpenAI API 키를 확인해주세요.")
+                    st.error(f"❌ Analysis error: {str(e)}")
+                    st.info("Please check your OpenAI API key.")
         
         # Display analysis result
         if st.session_state.analysis_result:
             st.markdown("""
             <div class="analysis-result">
-                <h4>📊 AI 분석 결과</h4>
+                <h4>📊 AI Analysis Result</h4>
             """, unsafe_allow_html=True)
             
             st.markdown(st.session_state.analysis_result)
             
             # Download analysis
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            analysis_filename = f"계약서_분석_{timestamp}.txt"
+            analysis_filename = f"contract_analysis_{timestamp}.txt"
             
             st.download_button(
-                label="📥 분석 결과 다운로드",
+                label="📥 Download Analysis Result",
                 data=st.session_state.analysis_result,
                 file_name=analysis_filename,
                 mime="text/plain",
@@ -837,12 +948,14 @@ if st.session_state.target_contract and st.session_state.target_contract["text"]
 
 # Security notice
 st.markdown("""
-<div class="content-box">
-    <div class="content-title">🔒 보안 안내</div>
+<div class="content-section">
+    <div class="section-title">🔒 Security Notice</div>
     <ul>
-        <li>업로드된 모든 파일은 세션 종료 시 자동으로 삭제됩니다</li>
-        <li>외부 저장소나 데이터베이스에 저장되지 않습니다</li>
-        <li>분석 결과는 다운로드 후 안전한 곳에 보관하세요</li>
+        <li>All uploaded files are automatically deleted when the session ends</li>
+        <li>No external storage or database is used</li>
+        <li>Please download analysis results to a secure location</li>
     </ul>
 </div>
-""", unsafe_allow_html=True) 
+""", unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True) 
